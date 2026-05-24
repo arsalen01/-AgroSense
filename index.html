@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroSense AI — Crop Yield Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="bg-layer" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🌿</span>
+      <span class="logo-text">AgroSense <span class="logo-accent">AI</span></span>
+    </div>
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      Model Online
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section class="hero">
+      <div class="hero-eyebrow">Precision Agriculture Intelligence</div>
+      <h1 class="hero-title">
+        Predict Crop Yields<br />
+        <span class="hero-highlight">Before They Grow</span>
+      </h1>
+      <p class="hero-sub">
+        Stacking ensemble · HGB + XGBoost + Ridge<br />
+        Enter parameters and get an instant kg/ha forecast.
+      </p>
+    </section>
+
+    <div class="card form-card">
+      <div class="card-inner">
+        <div class="form-grid">
+
+          <div class="field-group">
+            <label class="field-label" for="year">
+              <span class="label-icon">📅</span> Year
+            </label>
+            <input type="number" id="year" class="field-input" value="2023" min="1990" max="2100"/>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="country">
+              <span class="label-icon">🌍</span> Country
+            </label>
+            <select id="country" class="field-input field-select">
+              <option value="argentina">Argentina</option>
+              <option value="australia">Australia</option>
+              <option value="brazil">Brazil</option>
+              <option value="canada">Canada</option>
+              <option value="china">China</option>
+              <option value="france">France</option>
+              <option value="germany">Germany</option>
+              <option value="india">India</option>
+              <option value="indonesia">Indonesia</option>
+              <option value="japan">Japan</option>
+              <option value="mexico">Mexico</option>
+              <option value="russia">Russia</option>
+              <option value="south africa">South Africa</option>
+              <option value="uk">UK</option>
+              <option value="usa" selected>USA</option>
+            </select>
+          </div>
+
+          <div class="field-group field-group--full">
+            <label class="field-label">
+              <span class="label-icon">🌾</span> Crop
+            </label>
+            <div class="crop-toggle">
+              <button type="button" class="crop-btn active" data-value="maize">🌽 Maize</button>
+              <button type="button" class="crop-btn" data-value="rice">🌿 Rice</button>
+              <button type="button" class="crop-btn" data-value="wheat">🌾 Wheat</button>
+            </div>
+            <input type="hidden" id="crop" value="maize" />
+          </div>
+
+        </div>
+
+        <button id="predict-btn" class="predict-btn" type="button">
+          <span class="btn-text">Run Prediction</span>
+          <span class="btn-icon">→</span>
+          <div class="btn-shimmer"></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="loading-state" id="loading" aria-hidden="true">
+      <div class="loader-ring"><div class="loader-arc"></div></div>
+      <div class="loader-label">Analysing agronomic data…</div>
+    </div>
+
+    <div class="error-card" id="error-card" role="alert" aria-live="polite">
+      <span class="error-icon">⚠️</span>
+      <div>
+        <div class="error-title">Prediction failed</div>
+        <div class="error-msg" id="error-msg">Unable to reach the prediction service.</div>
+      </div>
+    </div>
+
+    <section class="result-section" id="result-section" aria-live="polite">
+      <div class="result-card" id="result-card">
+        <div class="result-crop-row">
+          <span class="result-emoji" id="result-emoji">🌽</span>
+          <span class="result-crop-name" id="result-crop-name">Maize</span>
+          <span class="result-tag" id="result-tag"></span>
+        </div>
+        <div class="result-value" id="result-value">—</div>
+        <div class="result-unit">kg / hectare</div>
+        <div class="result-note" id="result-note"></div>
+        <div class="result-bar-wrap">
+          <div class="result-bar" id="result-bar"></div>
+        </div>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    AgroSense AI &mdash; Agricultural Intelligence Platform &nbsp;·&nbsp; Model v2.1
+  </footer>
+
+  <script>
+    const cropBtns  = document.querySelectorAll('.crop-btn');
+    const cropInput = document.getElementById('crop');
+    cropBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        cropBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        cropInput.value = btn.dataset.value;
+      });
+    });
+
+    const loadingEl     = document.getElementById('loading');
+    const errorCard     = document.getElementById('error-card');
+    const errorMsgEl    = document.getElementById('error-msg');
+    const resultSection = document.getElementById('result-section');
+    const predictBtn    = document.getElementById('predict-btn');
+
+    const CROP_META = {
+      maize: { emoji: '🌽', label: 'Maize', maxRef: 12000 },
+      rice:  { emoji: '🌿', label: 'Rice',  maxRef: 10000 },
+      wheat: { emoji: '🌾', label: 'Wheat', maxRef: 9000  },
+    };
+
+    function setLoading(on) {
+      loadingEl.classList.toggle('visible', on);
+      predictBtn.disabled = on;
+    }
+    function showError(msg) { errorMsgEl.textContent = msg; errorCard.classList.add('visible'); }
+    function hideError()    { errorCard.classList.remove('visible'); }
+    function hideResult()   {
+      resultSection.classList.remove('visible');
+      document.getElementById('result-bar').style.width = '0%';
+    }
+
+    async function runPredict() {
+      hideError(); hideResult();
+      const year    = parseInt(document.getElementById('year').value);
+      const country = document.getElementById('country').value;
+      const crop    = cropInput.value;
+      if (!year || isNaN(year)) { showError('Please enter a valid year.'); return; }
+      setLoading(true);
+      try {
+        const resp = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ year, country, crop }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) { showError(data.detail || 'Prediction failed.'); return; }
+        renderResult(data, crop, country, year);
+      } catch (err) {
+        showError('Cannot reach the server. Is uvicorn running?');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function renderResult(data, crop, country, year) {
+      const meta = CROP_META[crop] || CROP_META.wheat;
+      const val  = parseFloat(data.yield);
+      const pct  = Math.min((val / meta.maxRef) * 100, 100).toFixed(1);
+      document.getElementById('result-emoji').textContent     = meta.emoji;
+      document.getElementById('result-crop-name').textContent = meta.label;
+      document.getElementById('result-value').textContent     = val.toLocaleString(undefined, { maximumFractionDigits: 1 });
+      document.getElementById('result-note').textContent      = data.note || '';
+      document.getElementById('result-tag').textContent       = year > 2023 ? 'Forecast' : 'Historical fit';
+      document.getElementById('result-meta').textContent      = `${country.charAt(0).toUpperCase() + country.slice(1)} · ${year}`;
+      resultSection.classList.add('visible');
+      setTimeout(() => { document.getElementById('result-bar').style.width = pct + '%'; }, 80);
+    }
+
+    predictBtn.addEventListener('click', runPredict);
+    document.getElementById('year').addEventListener('keydown', e => { if (e.key === 'Enter') runPredict(); });
+    document.getElementById('year').addEventListener('input', hideError);
+    
+  </script>
+  
+</body>
+</html>
