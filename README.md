@@ -15,7 +15,7 @@ The pipeline:
 
 🏆 Final model: a stacked hybrid ensemble (HGB + XGBoost + Ridge meta-learner) achieving R² = 0.967, RMSE = 486 kg/ha, MAPE = 6.4%
 
-🌐 Deployed as a Flask web app for real-time yield prediction by country, crop, and year
+🌐 Deployed as a Flask web app  and linked with ---FASTAPI---  for real-time yield prediction by country, crop, and year
 
 🔍 Interpretability via SHAP values, so the model doesn't just predict — it explains
 
