@@ -1,17 +1,26 @@
 SUMMARY:
+
 The problem with existing models: most are trained on a single country or crop, ignore critical inputs like fertilizer usage, and offer zero explainability to decision-makers who actually need to act on the predictions.
 Our approach: a fully reproducible, multi-country, multi-crop ML pipeline covering 1990–2023, fusing three open data sources 
 - FAOSTAT (agricultural production),
 - World Bank Climate Portal (temperature, precipitation, CO₂), 
 -FAOSTAT Inputs (fertilizer data)
+
 into a master dataset of 3,289 observations across 43 features.
+
 The pipeline:
 🔧 Full data cleaning: imputation, outlier detection (IQR + Z-score), standardization and temporal alignment
+
 ⚙️ Feature engineering: lagged yields (t-1, t-2, t-3), rolling statistics, climate anomalies, fertilizer intensity, temporal trend encoding
+
 🤖 Three models benchmarked: Random Forest, HistGradientBoosting, and XGBoost
+
 🏆 Final model: a stacked hybrid ensemble (HGB + XGBoost + Ridge meta-learner) achieving R² = 0.967, RMSE = 486 kg/ha, MAPE = 6.4%
+
 🌐 Deployed as a Flask web app for real-time yield prediction by country, crop, and year
+
 🔍 Interpretability via SHAP values, so the model doesn't just predict — it explains
+
 The result: a decision-support tool that can help policymakers, agronomists, and researchers anticipate cereal production shifts before they become crises.
 
 DEMO:
