@@ -1,6 +1,4 @@
-SUMMARY:
-
-The problem with existing models: most are trained on a single country or crop, ignore critical inputs like fertilizer usage, and offer zero explainability to decision-makers who actually need to act on the predictions.
+SUMMARY:      
 Our approach: a fully reproducible, multi-country, multi-crop ML pipeline covering 1990–2023, fusing three open data sources 
 - FAOSTAT (agricultural production),
 - World Bank Climate Portal (temperature, precipitation, CO₂), 
